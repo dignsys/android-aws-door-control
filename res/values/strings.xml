@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">AWS Tizen IoT Camera</string>
+    <string name="string_button_remocon_tv">TV</string>
+    <string name="string_button_remocon_ac">A/C</string>
+    <string name="string_button_setting">SET</string>
+    <string name="string_button_camera">CAM</string>
+    <string name="string_button_power">POWER</string>
+    <string name="string_button_menu">MENU</string>
+    <string name="string_button_channel">CH</string>
+    <string name="string_button_volume">VOL</string>
+    <string name="string_button_temp">TEMP</string>
+    <string name="string_button_fan">FAN</string>
+    <string name="key_up">▲</string>
+    <string name="key_volume_up">+</string>
+    <string name="key_volume_down">━</string>
+    <string name="key_channel_up">+</string>
+    <string name="key_channel_down">━</string>
+
+    <!-- camera command -->
+    <string name="message_door_open">DOOR_OPEN</string>
+    <string name="message_door_close">DOOR_CLOSE</string>
+
+    <!-- tv command -->
+    <string name="message_tv_power_on">TV_KEY_POWER</string>
+    <string name="message_tv_volume_up">TV_KEY_VOLUMEUP</string>
+    <string name="message_tv_volume_down">TV_KEY_VOLUMEDOWN</string>
+    <string name="message_tv_channel_up">TV_KEY_CHANNELUP</string>
+    <string name="message_tv_channel_down">TV_KEY_CHANNELDOWN</string>
+    <string name="message_tv_menu_on">TV_KEY_MENU</string>
+    <string name="message_tv_menu_up">TV_KEY_UP</string>
+    <string name="message_tv_menu_down">TV_KEY_DOWN</string>
+    <string name="message_tv_menu_left">TV_KEY_LEFT</string>
+    <string name="message_tv_menu_right">TV_KEY_RIGHT</string>
+
+    <!-- s3 download -->
+    <string name="download_activity">DownloadActivity</string>
+    <string name="imageview_activity">ImageViewActivity</string>
+    <string name="download_selection_activity">Select a file from the bucket</string>
+    <string name="download">Download</string>
+    <string name="downloadInBackground">Download In Background</string>
+    <string name="manage_download">Manage downloads</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="pause_all">Pause all</string>
+    <string name="cancel_all">Cancel all</string>
+    <string name="refreshing">Refreshing</string>
+    <string name="please_wait">Please wait</string>
+
+</resources>

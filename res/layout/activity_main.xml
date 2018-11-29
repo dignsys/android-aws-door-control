@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="3dp" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_weight="1"
+        android:background="@drawable/shape_blue_default" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Network Door Camera"
+            android:textColor="@color/colorOff"
+            android:textSize="24dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!--LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:padding="3dp" >
+
+        <Button
+            android:id="@+id/btnMenuRemoconVC"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_weight="1"
+            android:background="@drawable/menu_vaccum_normal" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight="1.5" />
+        <Button
+            android:id="@+id/btnMenuRemoconTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:background="@drawable/menu_tv_active" />
+    </LinearLayout-->
+
+    <LinearLayout
+        android:id="@+id/layoutMenuSetting"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="2.5"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="0dp"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:background="@android:color/darker_gray"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:gravity="center_vertical"
+                android:text="Client Id:" />
+
+            <TextView
+                android:id="@+id/tvClientId"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="center_vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:gravity="center_vertical"
+                android:text="Status:" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="center_vertical"
+                android:text="Disconnected" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btnConnect"
+                android:layout_gravity="left"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:text="Connect" />
+
+            <Button
+                android:id="@+id/btnDisconnect"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:layout_gravity="right"
+                android:text="Disconnect" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/txtSubcribe"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:hint="Topic name"
+                android:gravity="center_vertical" />
+
+            <Button
+                android:id="@+id/btnSubscribe"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="Subscribe" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:gravity="center_vertical|top"
+                android:text="Last message:" />
+
+            <TextView
+                android:id="@+id/tvLastMessage"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="center_vertical|top"
+                android:textSize="12dp"
+                android:text="N/A" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:gravity="center_vertical"
+                android:text="Topic:" />
+
+            <EditText
+                android:id="@+id/txtTopic"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:gravity="center_vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:gravity="center_vertical"
+                    android:text="Message:" />
+
+                <EditText
+                    android:id="@+id/txtMessage"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="5"
+                    android:gravity="center_vertical" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!--Button
+            android:id="@+id/btnPublish"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:text="Publish" /-->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btnPublish"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:text="Publish" />
+
+            <Button
+                android:id="@+id/buttonViewImage"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:text="Image View" />
+
+            <Button
+                android:id="@+id/btnDownload"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:text="Download" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutMenuCamera"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="2.5"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="0dp"
+        android:orientation="vertical"
+        android:visibility="visible" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/shape_gray_bg" />
+    </LinearLayout>
+
+    <!--LinearLayout
+        android:id="@+id/layoutMenuRemoconTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/remocon_bg"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical"
+        android:visibility="visible" >
+
+        <Button
+            android:id="@+id/btnTVPowerOn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center"
+            android:background="@drawable/power_hover" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:background="@drawable/shape_gray_bg"
+                android:orientation="vertical" >
+                <Button
+                    android:id="@+id/btnTVVolumeUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/key_plus_active" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"
+                    android:gravity="center"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:text="@string/string_button_volume" />
+                <Button
+                    android:id="@+id/btnTVVolumeDown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/key_minus_active" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="10dp"
+                android:layout_weight="10.0" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:background="@drawable/shape_gray_bg"
+                android:orientation="vertical" >
+                <Button
+                    android:id="@+id/btnTVChannelUp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/key_up_active" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"
+                    android:gravity="center"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:text="@string/string_button_channel" />
+                <Button
+                    android:id="@+id/btnTVChannelDown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/key_dn_active" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout-->
+
+    <!--TextView
+        android:id="@+id/btnReserved"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:text="" /-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_weight="1"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:visibility="visible" >
+        <Button
+            android:id="@+id/btnMenuCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="10dp"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"
+            android:background="@drawable/shape_blue_default"
+            android:gravity="center"
+            android:textSize="24dp"
+            android:textColor="@color/colorOff"
+            android:textStyle="bold"
+            android:text="@string/string_button_camera" />
+        <Button
+            android:id="@+id/btnDoorOpen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:layout_margin="0dp"
+            android:layout_gravity="center"
+            android:background="@drawable/key_play_hover" />
+        <Button
+            android:id="@+id/btnMenuSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"
+            android:background="@drawable/shape_gray_default"
+            android:gravity="center"
+            android:textSize="24dp"
+            android:textColor="@color/colorOff"
+            android:textStyle="bold"
+            android:text="@string/string_button_setting" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -23,6 +23,14 @@ import android.content.SharedPreferences;
 public class SettingData {
     private final static String TAG = SettingData.class.getSimpleName();
 
+    //message hander
+    public static final int MESSAGE_CONNECTED = 1;
+    public static final int MESSAGE_SUBSCRIBE = 2;
+    public static final int MESSAGE_DOWNLOAD = 3;
+    public static final int MESSAGE_POPUP_DIALOG = 4;
+    public static final int MESSAGE_RESULT_DIALOG = 5;
+    public static final int MESSAGE_TOAST = 100;
+
     //setting Preference
     public static final String PrefActivity = "com.amazonaws.demo.androidsubpub.settingdata";
     public static final String PREF_AWS_SUBSCRIBE_TOKEN = "aws_subcsribe_token";
@@ -31,8 +39,7 @@ public class SettingData {
     public static final int TRUE  = 1;
     public static final int FALSE = 0;
 
-    //public static final String DEFAULT_AWS_SUBSCRIBE_NAME = "#";
-    //public static final String DEFAULT_AWS_TOPIC_NAME = "tizen/sub";
+    // PubSub
     public static final String DEFAULT_AWS_SUBSCRIBE_NAME = "tizen/notify";
     public static final String DEFAULT_AWS_TOPIC_NAME = "tizen/cmd";
 

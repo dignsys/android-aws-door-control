@@ -84,6 +84,7 @@ public class DownloadActivity extends ListActivity {
      */
     static ArrayList<HashMap<String, Object>> transferRecordMaps;
     static int checkedIndex;
+    static String filename = null;
     static Util util;
 
     @Override
@@ -346,6 +347,7 @@ public class DownloadActivity extends ListActivity {
                 // Start downloading with the key they selected in the
                 // DownloadSelectionActivity screen.
                 String key = data.getStringExtra("key");
+                Log.d(TAG, "onActivityResult key_1: " + key);
                 beginDownload(key);
             }
         } else if (requestCode == DOWNLOAD_IN_BACKGROUND_SELECTION_REQUEST_CODE) {
@@ -353,6 +355,7 @@ public class DownloadActivity extends ListActivity {
                 // Start downloading with the key they selected in the
                 // DownloadSelectionActivity screen.
                 String key = data.getStringExtra("key");
+                Log.d(TAG, "onActivityResult key_2: " + key);
                 beginDownloadInBackground(key);
             }
         }
@@ -367,6 +370,7 @@ public class DownloadActivity extends ListActivity {
         File file = new File(Environment.getExternalStorageDirectory().toString() + "/" + key);
         Log.d(TAG, "beginDownload file: " + file.toString());
         SettingData.setSharedPreferenceString(getApplicationContext(), SettingData.PREF_AWS_S3_IMAGE_FILE, file.toString());
+        filename = file.toString();
 
         // Initiate the download
         TransferObserver observer = transferUtility.download(Constants.BUCKET_NAME, key, file);
@@ -461,6 +465,10 @@ public class DownloadActivity extends ListActivity {
         public void onStateChanged(int id, TransferState state) {
             Log.d(TAG, "onStateChanged: " + id + ", " + state);
             updateList();
+            if (state == TransferState.COMPLETED) {
+                //String file = SettingData.getSharedPreferenceString(getApplicationContext(), SettingData.PREF_AWS_S3_IMAGE_FILE);
+                Log.d(TAG, "Complete download file: " + filename);
+            }
         }
     }
 }

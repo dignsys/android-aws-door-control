@@ -34,18 +34,12 @@ public class ImageViewActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image);
-        initUI();
-        imageView_JPG();
+        imageView();
     }
 
-    private void initUI() {
-
-    }
-
-    private void imageView_JPG()
+    private void imageView()
     {
-        String filename = "/storage/emulated/0/Desert.jpg";
-        filename = SettingData.getSharedPreferenceString(getApplicationContext(), SettingData.PREF_AWS_S3_IMAGE_FILE);
+        String filename = SettingData.getSharedPreferenceString(getApplicationContext(), SettingData.PREF_AWS_S3_IMAGE_FILE);
         Log.d(TAG, String.format("image file: %s", filename));
 
         File imgFile = new File(filename);

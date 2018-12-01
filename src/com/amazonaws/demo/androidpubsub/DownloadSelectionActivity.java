@@ -40,6 +40,7 @@ import java.util.List;
  */
 public class DownloadSelectionActivity extends ListActivity {
 
+    private static final String TAG = DownloadSelectionActivity.class.getSimpleName();
     // The S3 client used for getting the list of objects in the bucket
     private AmazonS3Client s3;
     // An adapter to show the objects

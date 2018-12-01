@@ -21,22 +21,22 @@ public class Constants {
      * You should replace these values with your own. See the README for details
      * on what to fill in.
      */
-    public static final String COGNITO_POOL_ID = "CHANGE_ME";
+    public static final String COGNITO_POOL_ID = "ap-northeast-2:96e6f49f-7606-4464-80b7-714edbbf2efc";
 
     /*
      * Region of your Cognito identity pool ID.
      */
-    public static final String COGNITO_POOL_REGION = "CHANGE_ME";
+    public static final String COGNITO_POOL_REGION = "ap-northeast-2";
 
     /*
      * Note, you must first create a bucket using the S3 console before running
      * the sample (https://console.aws.amazon.com/s3/). After creating a bucket,
      * put it's name in the field below.
      */
-    public static final String BUCKET_NAME = "CHANGE_ME";
+    public static final String BUCKET_NAME = "tizen.s3.camera.testbucket2";
 
     /*
      * Region of your bucket.
      */
-    public static final String BUCKET_REGION = "CHANGE_ME";
+    public static final String BUCKET_REGION = "us-east-1";
 }

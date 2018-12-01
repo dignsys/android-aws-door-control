@@ -15,18 +15,21 @@
 
 package com.amazonaws.demo.androidpubsub;
 
+import android.Manifest;
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -35,6 +38,7 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.iot.AWSIotKeystoreHelper;
@@ -63,6 +67,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
+import static com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback.AWSIotMqttClientStatus.Connected;
 
 public class PubSubActivity extends Activity implements View.OnClickListener {
 
@@ -129,8 +135,6 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
     private Button btnViewImage;
 
     private static final int DOWNLOAD_SELECTION_REQUEST_CODE = 1;
-    // Indicates no row element has beens selected
-    private static final int INDEX_NOT_CHECKED = -1;
 
     // This is the main class for interacting with the Transfer Manager
     static TransferUtility transferUtility;
@@ -151,6 +155,63 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
     static Util util;
 
     static boolean door_opened = false;  // false : door close, true : door open
+    static private Handler mHandler = null;
+    static public ProgressPopupDialog mProgressPopupDialog = null;
+
+    private void handleMessage_Action(Message msg) {
+        Intent intent = null;
+        String result = null;
+        String tstr = null;
+        Log.d(LOG_TAG, "handleMessage: " + msg.what);
+
+        switch (msg.what) {
+            case SettingData.MESSAGE_CONNECTED:
+                result = (String)msg.obj;
+                SendMessage(SettingData.MESSAGE_TOAST, result);
+                if (result.contains("Connect") == true)
+                    onClickSubscribe();
+                break;
+            case SettingData.MESSAGE_SUBSCRIBE:
+                result = (String)msg.obj;
+                SendMessage(SettingData.MESSAGE_TOAST, "AWS Message arrived: " + result);
+                SendMessage(SettingData.MESSAGE_POPUP_DIALOG, getResources().getString(R.string.progress_downloading));
+                beginDownload(result);
+                break;
+            case SettingData.MESSAGE_DOWNLOAD:
+                result = (String)msg.obj;
+                SendMessage(SettingData.MESSAGE_TOAST, "AWS S3: " + result);
+                if (mProgressPopupDialog != null) {
+                    mProgressPopupDialog.dialogDismiss(); // 없애기
+                    mProgressPopupDialog = null;
+                }
+                imageView();
+                break;
+            case SettingData.MESSAGE_POPUP_DIALOG:
+                if (mProgressPopupDialog != null) {
+                    mProgressPopupDialog.dialogDismiss(); // 없애기
+                    mProgressPopupDialog = null;
+                }
+                result = (String)msg.obj;
+                Log.i(LOG_TAG,"MESSAGE_PROGRESS_POPUP result: " + result + ", mProgressPopupDialog: " + mProgressPopupDialog);
+                if (mProgressPopupDialog == null) {
+                    String error_msg = getResources().getString(R.string.popup_download_fail);
+                    mProgressPopupDialog = new ProgressPopupDialog(this, result, error_msg);
+                    mProgressPopupDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    mProgressPopupDialog.show();
+                }
+
+                break;
+            case SettingData.MESSAGE_RESULT_DIALOG:
+                break;
+            case SettingData.MESSAGE_TOAST:
+                result = (String)msg.obj;
+                Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
+                break;
+
+            default:
+                break;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +219,16 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                handleMessage_Action(msg);
+            }
+        };
+
         this.context = getApplicationContext();
+        verifyStoragePermissions(this);
+
         setLayout(savedInstanceState);
         setLayoutS3(savedInstanceState);
 
@@ -338,8 +408,6 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent intent = new Intent(PubSubActivity.this, DownloadSelectionActivity.class);
-                //startActivityForResult(intent, DOWNLOAD_SELECTION_REQUEST_CODE);
                 Intent intent = new Intent(PubSubActivity.this, DownloadActivity.class);
                 startActivity(intent);
             }
@@ -354,11 +422,22 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
         });
 
         // Initializes TransferUtility, always do this before using it.
-//        init_s3download(savedInstanceState);
-//        util = new Util();
-//        transferUtility = util.getTransferUtility(this);
-//        checkedIndex = INDEX_NOT_CHECKED;
-//        transferRecordMaps = new ArrayList<HashMap<String, Object>>();
+        util = new Util();
+        transferUtility = util.getTransferUtility(this);
+    }
+
+    private void doorHoverOpenDraw(Boolean open) {
+        if (open == true)
+            btnDoorOpen.setBackgroundResource(R.drawable.doorlock_unlock_hover);
+        else
+            btnDoorOpen.setBackgroundResource(R.drawable.doorlock_lock_hover);
+    }
+
+    private void doorActiveOpenDraw(Boolean open) {
+        if (open == true)
+            btnDoorOpen.setBackgroundResource(R.drawable.doorlock_unlock_active);
+        else
+            btnDoorOpen.setBackgroundResource(R.drawable.doorlock_lock_active);
     }
 
     @Override
@@ -371,16 +450,22 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
             case R.id.btnMenuCamera:
                 layoutMenuCamera.setVisibility(View.VISIBLE);
                 layoutMenuSetting.setVisibility(View.GONE);
-                btnMenuCamera.setBackgroundResource(R.drawable.shape_blue_default);
-                btnMenuSetting.setBackgroundResource(R.drawable.shape_gray_default);
+                btnMenuCamera.setBackgroundResource(R.drawable.doorlock_pic_active);
+                //btnDoorOpen.setBackgroundResource(R.drawable.doorlock_lock_hover);
+                btnMenuSetting.setBackgroundResource(R.drawable.doorlock_set_hover);
+                doorHoverOpenDraw(door_opened);
                 break;
             case R.id.btnMenuSetting:
                 layoutMenuCamera.setVisibility(View.GONE);
                 layoutMenuSetting.setVisibility(View.VISIBLE);
-                btnMenuCamera.setBackgroundResource(R.drawable.shape_gray_default);
-                btnMenuSetting.setBackgroundResource(R.drawable.shape_blue_default);
+                btnMenuCamera.setBackgroundResource(R.drawable.doorlock_pic_hover);
+                //btnDoorOpen.setBackgroundResource(R.drawable.doorlock_lock_hover);
+                btnMenuSetting.setBackgroundResource(R.drawable.doorlock_set_active);
+                doorHoverOpenDraw(door_opened);
                 break;
             case R.id.btnDoorOpen:
+                btnMenuCamera.setBackgroundResource(R.drawable.doorlock_pic_hover);
+                btnMenuSetting.setBackgroundResource(R.drawable.doorlock_set_hover);
                 if (!door_opened) {
                     msg = getResources().getString(R.string.message_door_open);
                     door_opened = true;
@@ -388,7 +473,7 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
                     msg = getResources().getString(R.string.message_door_close);
                     door_opened = false;
                 }
-                imageView_JPG();
+                doorActiveOpenDraw(door_opened);
                 break;
         }
         if (msg != null) {
@@ -404,7 +489,6 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        //initData();
     }
 
     @Override
@@ -412,103 +496,11 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
         super.onPause();
         // Clear transfer listeners to prevent memory leak, or
         // else this activity won't be garbage collected.
-        //if (observers != null && !observers.isEmpty()) {
-        //    for (TransferObserver observer : observers) {
-        //        observer.cleanTransferListener();
-        //    }
-        //}
-    }
-
-    protected void init_s3download(Bundle savedInstanceState)
-    {
-        /**
-         * This adapter takes the data in transferRecordMaps and displays it,
-         * with the keys of the map being related to the columns in the adapter
-         */
-        simpleAdapter = new SimpleAdapter(this, transferRecordMaps,
-                R.layout.record_item, new String[] {
-                "checked", "fileName", "progress", "bytes", "state", "percentage"
-        },
-                new int[] {
-                        R.id.radioButton1, R.id.textFileName, R.id.progressBar1, R.id.textBytes,
-                        R.id.textState, R.id.textPercentage
-                });
-        simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Object data,
-                                        String textRepresentation) {
-                switch (view.getId()) {
-                    case R.id.radioButton1:
-                        RadioButton radio = (RadioButton) view;
-                        radio.setChecked((Boolean) data);
-                        return true;
-                    case R.id.textFileName:
-                        TextView fileName = (TextView) view;
-                        fileName.setText((String) data);
-                        return true;
-                    case R.id.progressBar1:
-                        ProgressBar progress = (ProgressBar) view;
-                        progress.setProgress((Integer) data);
-                        return true;
-                    case R.id.textBytes:
-                        TextView bytes = (TextView) view;
-                        bytes.setText((String) data);
-                        return true;
-                    case R.id.textState:
-                        TextView state = (TextView) view;
-                        state.setText(((TransferState) data).toString());
-                        return true;
-                    case R.id.textPercentage:
-                        TextView percentage = (TextView) view;
-                        percentage.setText((String) data);
-                        return true;
-                }
-                return false;
-            }
-        });
-//        setListAdapter(simpleAdapter);
-//
-//        // Updates checked index when an item is clicked
-//        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
-//                Log.i(LOG_TAG, "pos: " + pos + ", id: " + id);
-//                if (checkedIndex != pos) {
-//                    transferRecordMaps.get(pos).put("checked", true);
-//                    if (checkedIndex >= 0) {
-//                        transferRecordMaps.get(checkedIndex).put("checked", false);
-//                    }
-//                    checkedIndex = pos;
-//                    //updateButtonAvailability();
-//                    simpleAdapter.notifyDataSetChanged();
-//                }
-//            }
-//        });
-    }
-
-    /**
-     * Gets all relevant transfers from the Transfer Service for populating the
-     * UI
-     */
-    static void initData() {
-        transferRecordMaps.clear();
-        // Uses TransferUtility to get all previous download records.
-        observers = transferUtility.getTransfersWithType(TransferType.DOWNLOAD);
-        TransferListener listener = new DownloadListener();
-        for (TransferObserver observer : observers) {
-            observer.refresh();
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            util.fillMap(map, observer, false);
-            transferRecordMaps.add(map);
-
-            // Sets listeners to in progress transfers
-            if (TransferState.WAITING.equals(observer.getState())
-                    || TransferState.WAITING_FOR_NETWORK.equals(observer.getState())
-                    || TransferState.IN_PROGRESS.equals(observer.getState())) {
-                observer.setTransferListener(listener);
+        if (observers != null && !observers.isEmpty()) {
+            for (TransferObserver observer : observers) {
+                observer.cleanTransferListener();
             }
         }
-        simpleAdapter.notifyDataSetChanged();
     }
 
     View.OnClickListener connectClick = new View.OnClickListener() {
@@ -530,8 +522,9 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
                                 if (status == AWSIotMqttClientStatus.Connecting) {
                                     tvStatus.setText("Connecting...");
 
-                                } else if (status == AWSIotMqttClientStatus.Connected) {
+                                } else if (status == Connected) {
                                     tvStatus.setText("Connected");
+                                    SendMessage(SettingData.MESSAGE_CONNECTED, "AWS PUB: Connected");
 
                                 } else if (status == AWSIotMqttClientStatus.Reconnecting) {
                                     if (throwable != null) {
@@ -561,61 +554,14 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
     View.OnClickListener subscribeClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
-            final String topic = txtSubcribe.getText().toString();
-
-            Log.d(LOG_TAG, "topic = " + topic);
-
-            try {
-                mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0,
-                        new AWSIotMqttNewMessageCallback() {
-                            @Override
-                            public void onMessageArrived(final String topic, final byte[] data) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            String message = new String(data, "UTF-8");
-                                            Log.d(LOG_TAG, "Message arrived:");
-                                            Log.d(LOG_TAG, "   Topic: " + topic);
-                                            Log.d(LOG_TAG, " Message: " + message);
-
-                                            tvLastMessage.setText(message);
-
-                                        } catch (UnsupportedEncodingException e) {
-                                            Log.e(LOG_TAG, "Message encoding error.", e);
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                if (subscribe_token.equals(topic) == false) {
-                    subscribe_token = topic;
-                    SettingData.setSharedPreferenceString(context, SettingData.PREF_AWS_SUBSCRIBE_TOKEN, subscribe_token);
-                }
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Subscription error.", e);
-            }
+            onClickSubscribe();
         }
     };
 
     View.OnClickListener publishClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
-            final String topic = txtTopic.getText().toString();
-            final String msg = txtMessage.getText().toString();
-
-            try {
-                mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
-                if (topic_token.equals(topic) == false) {
-                    topic_token = topic;
-                    SettingData.setSharedPreferenceString(context, SettingData.PREF_AWS_TOPIC_TOKEN, topic_token);
-                }
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Publish error.", e);
-            }
-
+            onClickPublish();
         }
     };
 
@@ -631,6 +577,59 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
 
         }
     };
+
+    private void onClickSubscribe() {
+        final String topic = txtSubcribe.getText().toString();
+
+        Log.d(LOG_TAG, "topic = " + topic);
+
+        try {
+            mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0,
+                    new AWSIotMqttNewMessageCallback() {
+                        @Override
+                        public void onMessageArrived(final String topic, final byte[] data) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        String message = new String(data, "UTF-8");
+                                        Log.d(LOG_TAG, "Message arrived:");
+                                        Log.d(LOG_TAG, "   Topic: " + topic);
+                                        Log.d(LOG_TAG, " Message: " + message);
+
+                                        tvLastMessage.setText(message);
+                                        SendMessage(SettingData.MESSAGE_SUBSCRIBE, message);
+
+                                    } catch (UnsupportedEncodingException e) {
+                                        Log.e(LOG_TAG, "Message encoding error.", e);
+                                    }
+                                }
+                            });
+                        }
+                    });
+            if (subscribe_token.equals(topic) == false) {
+                subscribe_token = topic;
+                SettingData.setSharedPreferenceString(context, SettingData.PREF_AWS_SUBSCRIBE_TOKEN, subscribe_token);
+            }
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Subscription error.", e);
+        }
+    }
+
+    private void onClickPublish() {
+        final String topic = txtTopic.getText().toString();
+        final String msg = txtMessage.getText().toString();
+
+        try {
+            mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
+            if (topic_token.equals(topic) == false) {
+                topic_token = topic;
+                SettingData.setSharedPreferenceString(context, SettingData.PREF_AWS_TOPIC_TOKEN, topic_token);
+            }
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Publish error.", e);
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -665,23 +664,7 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
          * startActivityForResult -> onActivityResult -> beginUpload -> onResume
          * -> set listeners to in progress transfers.
          */
-        // observer.setTransferListener(new DownloadListener());
-    }
-
-    /*
-     * Updates the ListView according to observers, by making transferRecordMap
-     * reflect the current data in observers.
-     */
-    static void updateList() {
-        TransferObserver observer = null;
-        HashMap<String, Object> map = null;
-        for (int i = 0; i < observers.size(); i++) {
-            observer = observers.get(i);
-            observer.setTransferListener(new DownloadListener());
-            map = transferRecordMaps.get(i);
-            util.fillMap(map, observer, i == checkedIndex);
-        }
-        simpleAdapter.notifyDataSetChanged();
+        observer.setTransferListener(new DownloadListener());
     }
 
     /*
@@ -693,27 +676,54 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
         @Override
         public void onError(int id, Exception e) {
             Log.e(LOG_TAG, "onError: " + id, e);
-            updateList();
         }
 
         @Override
         public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
             Log.d(LOG_TAG, String.format("onProgressChanged: %d, total: %d, current: %d",
                     id, bytesTotal, bytesCurrent));
-            updateList();
         }
 
         @Override
         public void onStateChanged(int id, TransferState state) {
             Log.d(LOG_TAG, "onStateChanged: " + id + ", " + state);
-            updateList();
+            if (state == TransferState.COMPLETED) {
+                SendMessage(SettingData.MESSAGE_DOWNLOAD, TransferState.COMPLETED.toString());
+            }
         }
     }
 
-    private void imageView_JPG()
+    public static void SendMessage(int id, String result)
     {
-        String filename = "/storage/emulated/0/Desert.jpg";
-        //filename = SettingData.getSharedPreferenceString(getApplicationContext(), SettingData.PREF_AWS_S3_IMAGE_FILE);
+        if (mHandler == null) return;
+        Message message = mHandler.obtainMessage();
+        message.what = id;
+        message.arg1 = id;
+        message.obj = result;
+        mHandler.sendMessage(message);
+    }
+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    public void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            activity.requestPermissions(
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+    private void imageView()
+    {
+        String filename = SettingData.getSharedPreferenceString(getApplicationContext(), SettingData.PREF_AWS_S3_IMAGE_FILE);
         Log.d(LOG_TAG, String.format("image file: %s", filename));
 
         File imgFile = new  File(filename);

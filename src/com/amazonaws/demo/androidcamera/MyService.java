@@ -1,4 +1,4 @@
-package com.amazonaws.demo.androidpubsub;
+package com.amazonaws.demo.androidcamera;
 
 import android.app.Service;
 import android.content.Intent;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.amazonaws.demo.androidpubsub;
+package com.amazonaws.demo.androidcamera;
 
 import android.app.Activity;
 import android.content.Context;

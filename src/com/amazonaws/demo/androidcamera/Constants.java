@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package com.amazonaws.demo.androidpubsub;
+package com.amazonaws.demo.androidcamera;
 
 public class Constants {
 

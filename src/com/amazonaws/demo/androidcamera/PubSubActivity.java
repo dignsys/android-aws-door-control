@@ -75,16 +75,15 @@ public class PubSubActivity extends Activity implements View.OnClickListener {
 
     // IoT endpoint
     // AWS Iot CLI describe-endpoint call returns: XXXXXXXXXX.iot.<region>.amazonaws.com
-    private static final String CUSTOMER_SPECIFIC_ENDPOINT = "a1rsxf9l9806mh-ats.iot.ap-northeast-2.amazonaws.com";
+    private static final String CUSTOMER_SPECIFIC_ENDPOINT = "<CHANGE ME>";
     // Cognito pool ID. For this app, pool needs to be unauthenticated pool with
     // AWS IoT permissions.
-    // private static final String COGNITO_POOL_ID = "ap-northeast-2_BPW5aWbOU";
-    private static final String COGNITO_POOL_ID = "ap-northeast-2:340c8df9-7178-4f78-b8d0-edcad9bf6b95";
+    private static final String COGNITO_POOL_ID = "<CHANGE ME>";
     // Name of the AWS IoT policy to attach to a newly created certificate
-    private static final String AWS_IOT_POLICY_NAME = "tizen-policy";
+    private static final String AWS_IOT_POLICY_NAME = "<CHANGE ME>";
 
     // Region of AWS IoT
-    private static final Regions MY_REGION = Regions.AP_NORTHEAST_2; //Regions.US_EAST_1;
+    private static final Regions MY_REGION = Regions.AP_NORTHEAST_2;
     // Filename of KeyStore file on the filesystem
     private static final String KEYSTORE_NAME = "iot_keystore";
     // Password for the private key in the KeyStore
